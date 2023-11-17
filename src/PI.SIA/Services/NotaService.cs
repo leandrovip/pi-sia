@@ -43,6 +43,7 @@ public class NotaService
             .Select(aluno => new RelatorioNotaDto
             {
                 Nome = aluno.Nome,
+                RegistroAlulo = aluno.RegistroAluno,
                 Quantidade = aluno.Notas.Count,
                 Media = aluno.Notas.Any() ? aluno.Notas.Average(nota => nota.Valor) : 0,
                 Aprovado = aluno.Notas.Any() && aluno.Notas.Average(nota => nota.Valor) >= 6

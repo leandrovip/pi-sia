@@ -21,6 +21,7 @@ else
         <thead class="table-dark">
             <tr>
                 <th>Nome do Aluno</th>
+                <th>Registro do Aluno</th>
                 <th class="text-center">Quantidade de Notas</th>
                 <th class="text-center">Média Final</th>
                 <th class="text-center">Aprovado</th>
@@ -31,6 +32,7 @@ else
             {
                 <tr>
                     <td>@registro.Nome</td>
+                    <td>@registro.RegistroAlulo</td>
                     <td class="text-center">@registro.Quantidade</td>
                     <td class="text-center">@registro.Media.ToString("N2")</td>
                     <td class="text-center"><strong> @(registro.Aprovado ? "Sim" : "Não")</strong></td>
