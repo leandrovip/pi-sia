@@ -1,0 +1,59 @@
+﻿@page "/relatorio"
+@using PI.SIA.Models
+@using PI.SIA.Services
+@inject NotaService _service 
+
+<PageTitle>Relatório de Notas</PageTitle>
+
+<h2 class="fw-bolder">Relatório de Notas</h2>
+<br/>
+<br/>
+
+@if (registros == null)
+{
+    <p>
+        <em>Carregando...</em>
+    </p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Nome do Aluno</th>
+                <th class="text-center">Quantidade de Notas</th>
+                <th class="text-center">Média Final</th>
+                <th class="text-center">Aprovado</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var registro in registros)
+            {
+                <tr>
+                    <td>@registro.Nome</td>
+                    <td class="text-center">@registro.Quantidade</td>
+                    <td class="text-center">@registro.Media.ToString("N2")</td>
+                    <td class="text-center"><strong> @(registro.Aprovado ? "Sim" : "Não")</strong></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <br />
+    <p><strong>Total de Alunos: @registros.Count</strong></p>
+}
+
+@code {
+    private List<RelatorioNotaDto> registros;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Atualizar();
+    }
+
+    private async Task Atualizar()
+    {
+        registros = await _service.ObterRelatorioNotasAsync();
+    }
+
+}

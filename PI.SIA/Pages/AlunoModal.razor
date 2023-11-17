@@ -1,0 +1,75 @@
+﻿@page "/alunos/{Id:int}"
+@using PI.SIA.Models
+@using PI.SIA.Services
+@inject AlunoService AlunoService
+@inject NavigationManager NavigationManager
+
+<div class="container mt-3">
+    <h3 class="fw-bolder">@(Id == 0 ? "Adicionar" : "Editar") Aluno</h3>
+
+    <EditForm Model="@aluno" OnValidSubmit="@HandleValidSubmit">
+        <div class="form-group">
+            <label for="nome">Nome</label>
+            <InputText id="nome" class="form-control" @bind-Value="aluno.Nome"/>
+        </div>
+        <br/>
+
+        <div class="form-group">
+            <label for="registroAluno">Registro do Aluno</label>
+            <InputText id="registroAluno" class="form-control" @bind-Value="aluno.RegistroAluno"/>
+        </div>
+        <br/>
+
+        <div class="form-group">
+            <label for="dataNascimento">Data de Nascimento</label>
+            <InputDate id="dataNascimento" class="form-control" @bind-Value="aluno.DataNascimento"/>
+        </div>
+        <br/>
+
+        <div class="form-group">
+            <label for="endereco">Endereço</label>
+            <InputText id="endereco" class="form-control" @bind-Value="aluno.Endereco"/>
+        </div>
+        <br/>
+
+        <button type="submit" class="btn btn-success">Salvar</button>
+        <button class="btn btn-secondary" @onclick="Voltar">Cancelar</button>
+    </EditForm>
+</div>
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private Aluno aluno = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != 0)
+        {
+            aluno = await AlunoService.ObterPorIdAsync(Id);
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (aluno.Nome.IsNullOrEmpty()) return;
+
+        if (Id == 0)
+        {
+            await AlunoService.IncluirAsync(aluno);
+        }
+        else
+        {
+            await AlunoService.EditarAsync(aluno);
+        }
+
+        NavigationManager.NavigateTo("/alunos");
+    }
+
+    private void Voltar()
+    {
+        NavigationManager.NavigateTo("/alunos");
+    }
+}

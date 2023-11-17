@@ -1,0 +1,81 @@
+﻿@page "/salas"
+@using PI.SIA.Models
+@using PI.SIA.Services
+@inject SalaService _service 
+@inject NavigationManager Navigate
+
+<PageTitle>Salas</PageTitle>
+
+<h2 class="fw-bolder">Cadastro de Salas</h2>
+<br/>
+
+<button class="btn btn-primary" @onclick="IncluirRegistro">Incluir</button>
+<br/>
+<br/>
+
+@if (registros == null)
+{
+    <p>
+        <em>Carregando...</em>
+    </p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Nome da Sala</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var registro in registros)
+            {
+                <tr>
+                    <td>@registro.Id</td>
+                    <td>@registro.Nome</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" @onclick="() => EditarRegistro(registro.Id)">
+                            <i class="oi oi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => RemoverRegistro(registro)">
+                            <i class="oi oi-x"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Sala> registros;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Atualizar();
+    }
+
+    private async Task Atualizar()
+    {
+        registros = await _service.ObterTodosAsync();
+    }
+
+    private void IncluirRegistro()
+    {
+        Navigate.NavigateTo("/salas/0");
+    }
+
+    private void EditarRegistro(int id)
+    {
+        Navigate.NavigateTo($"/salas/{id}");
+    }
+
+    private async Task RemoverRegistro(Sala registro)
+    {
+        await _service.RemoverAsync(registro);
+        await Atualizar();
+    }
+
+}

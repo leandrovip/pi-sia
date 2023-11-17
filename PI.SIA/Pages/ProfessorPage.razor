@@ -1,0 +1,83 @@
+﻿@page "/professores"
+@using PI.SIA.Models
+@using PI.SIA.Services
+@inject ProfessorService _service 
+@inject NavigationManager Navigate
+
+<PageTitle>Professores</PageTitle>
+
+<h2 class="fw-bolder">Cadastro de Professores</h2>
+<br/>
+
+<button class="btn btn-primary" @onclick="IncluirRegistro">Incluir</button>
+<br/>
+<br/>
+
+@if (registros == null)
+{
+    <p>
+        <em>Carregando...</em>
+    </p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Especialização</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var registro in registros)
+            {
+                <tr>
+                    <td>@registro.Id</td>
+                    <td>@registro.Nome</td>
+                    <td>@registro.Especializacao</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" @onclick="() => EditarRegistro(registro.Id)">
+                            <i class="oi oi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => RemoverRegistro(registro)">
+                            <i class="oi oi-x"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Professor> registros;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Atualizar();
+    }
+
+    private async Task Atualizar()
+    {
+        registros = await _service.ObterTodosAsync();
+    }
+
+    private void IncluirRegistro()
+    {
+        Navigate.NavigateTo("/professores/0");
+    }
+
+    private void EditarRegistro(int id)
+    {
+        Navigate.NavigateTo($"/professores/{id}");
+    }
+
+    private async Task RemoverRegistro(Professor registro)
+    {
+        await _service.RemoverAsync(registro);
+        await Atualizar();
+    }
+
+}

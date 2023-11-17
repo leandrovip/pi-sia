@@ -1,0 +1,83 @@
+﻿@page "/notas"
+@using PI.SIA.Models
+@using PI.SIA.Services
+@inject SalaService _salaService
+@inject NotaService _notaService
+@inject NavigationManager _navigate;
+
+<h3 class="fw-bolder">Lançamento de Notas</h3>
+<br >
+
+<p><strong>Selecione a Sala desejada</strong></p>
+<select class="form-control"  @bind="salaId" @bind:after="CarregarAlunos">
+    <option value="0">Nenhuma Selecionada</option>
+
+    @foreach (var sala in salas)
+    {
+        <option value="@sala.Id">@sala.Nome</option>
+    }
+</select>
+<br/>
+<br />
+<br />
+
+@if (alunos != null)
+{
+    <table class="table table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Nome do Aluno</th>
+                <th>Nota</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var aluno in alunos)
+            {
+                <tr>
+                    <td>@aluno.Nome</td>
+                    <td>
+                        <InputNumber class="form-control" @bind-Value="aluno.Nota" min="0" max="10"/>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <br/>
+
+    <button class="btn btn-success" @onclick="SalvarNotas">Salvar Notas</button>
+}
+
+@code {
+    private List<Sala> salas;
+    private List<AlunoNota> alunos;
+    private int salaId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        salas = await _salaService.ObterTodosAsync();
+    }
+
+    private void CarregarAlunos()
+    {
+        if (salaId != 0)
+        {
+            alunos = new List<AlunoNota>();
+
+            foreach (var aluno in salas.First(x => x.Id == salaId).Alunos)
+            {
+                alunos.Add(new AlunoNota {Id = aluno.Id, Nome = aluno.Nome, Nota = 0});
+            }
+        }
+    }
+
+    private async Task SalvarNotas()
+    {
+        foreach (var aluno in alunos)
+        {
+            await _notaService.IncluirAsync(new Nota {AlunoId = aluno.Id, SalaId = salaId, Valor = aluno.Nota, DataNota = DateTime.Now});
+        }
+
+        _navigate.NavigateTo("/notas");
+    }
+
+}

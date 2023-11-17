@@ -1,0 +1,121 @@
+﻿@page "/salas/{Id:int}"
+@using PI.SIA.Models
+@using PI.SIA.Services
+@inject SalaService _service
+@inject AlunoService _alunoService
+@inject ProfessorService _professorService
+@inject NavigationManager NavigationManager
+
+<div class="container mt-3">
+    <h3 class="fw-bolder">@(Id == 0 ? "Adicionar" : "Editar") Salas</h3>
+    <br/>
+
+    <EditForm Model="@registro" OnValidSubmit="@HandleValidSubmit">
+        <div class="form-group">
+            <label for="nomeSala">Nome da Sala</label>
+            <InputText id="nomeSala" class="form-control" @bind-Value="                        registro.Nome"/>
+        </div>
+        <br/>
+
+        <div class="form-group">
+            <label for="professor">Professor</label>
+            <select @bind="professorId" class="form-control" id="professor">
+                @foreach (var professor in professores)
+                {
+                    <option value="@professor.Id">@professor.Nome</option>
+                }
+            </select>
+        </div>
+        <br />
+
+        <div class="form-group">
+            <label for="alunos">Alunos</label>
+            <select @bind="alunoId" class="form-control">
+                @foreach (var aluno in alunos)
+                {
+                    <option value="@aluno.Id">@aluno.Nome</option>
+                }
+            </select>
+            <button class="btn btn-secondary mt-3" @onclick="AdicionarAluno">Adicionar Aluno</button>
+        </div>
+        <br />
+
+        <p><strong>Alunos Selecionados</strong></p>
+        <ul>
+            @foreach (var aluno in registro.Alunos)
+            {
+                <li>@alunos.FirstOrDefault(a => a.Id == aluno.Id)?.Nome</li>
+            }
+        </ul>
+        <br />
+
+        <button type="submit" class="btn btn-success">Salvar</button>
+        <button class="btn btn-secondary" @onclick="Voltar">Cancelar</button>
+    </EditForm>
+</div>
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private Sala registro = new();
+    private List<Professor> professores;
+    private List<Aluno> alunos;
+
+    private int professorId;
+    private int alunoId;
+    private bool tentouAdicionarAluno = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        professores = await _professorService.ObterTodosAsync();
+        alunos = await _alunoService.ObterTodosAsync();
+
+        if (Id != 0)
+        {
+            registro = await _service.ObterPorIdAsync(Id);
+            professorId = registro.ProfessorId;
+        }
+    }
+
+    private void AdicionarAluno()
+    {
+        if (alunoId != 0 && registro.Alunos.All(x => x.Id != alunoId))
+        {
+            registro.Alunos.Add(alunos.First(x => x.Id == alunoId));
+        }
+
+        tentouAdicionarAluno = true;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (tentouAdicionarAluno)
+        {
+            tentouAdicionarAluno = false;
+            return;
+        }
+
+        if (registro.Nome.IsNullOrEmpty()) return;
+        if (professorId == 0) return;
+
+        registro.ProfessorId = professorId;
+
+        if (Id == 0)
+        {
+            await _service.IncluirAsync(registro);
+        }
+        else
+        {
+            await _service.EditarAsync(registro);
+        }
+
+        NavigationManager.NavigateTo("/salas");
+    }
+
+    private void Voltar()
+    {
+        NavigationManager.NavigateTo("/salas");
+    }
+}

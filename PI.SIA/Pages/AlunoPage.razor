@@ -1,0 +1,85 @@
+﻿@page "/alunos"
+@using PI.SIA.Models
+@using PI.SIA.Services
+@inject AlunoService AlunoService 
+@inject NavigationManager Navigate
+
+<PageTitle>Alunos</PageTitle>
+
+<h2 class="fw-bolder">Cadastro de Alunos</h2>
+<br/>
+
+<button class="btn btn-primary" @onclick="IncluirAluno">Incluir</button>
+<br/>
+<br/>
+
+@if (alunos == null)
+{
+    <p>
+        <em>Carregando...</em>
+    </p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Data de Nascimento</th>
+                <th>Endereço</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var aluno in alunos)
+            {
+                <tr>
+                    <td>@aluno.Id</td>
+                    <td>@aluno.Nome</td>
+                    <td>@aluno.DataNascimento.ToString("dd/MM/yyyy")</td>
+                    <td>@aluno.Endereco</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" @onclick="() => EditarAluno(aluno.Id)">
+                            <i class="oi oi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => RemoverAluno(aluno)">
+                            <i class="oi oi-x"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Aluno> alunos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Atualizar();
+    }
+
+    private async Task Atualizar()
+    {
+        alunos = await AlunoService.ObterTodosAsync();
+    }
+
+    private void IncluirAluno()
+    {
+        Navigate.NavigateTo("/alunos/0");
+    }
+
+    private void EditarAluno(int id)
+    {
+        Navigate.NavigateTo($"/alunos/{id}");
+    }
+
+    private async Task RemoverAluno(Aluno aluno)
+    {
+        await AlunoService.RemoverAsync(aluno);
+        await Atualizar();
+    }
+
+}
